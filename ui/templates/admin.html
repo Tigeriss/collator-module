@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="/static/style/table.css">
+    <link rel="stylesheet" type="text/css" href="/static/style/main.css">
+    <link rel="stylesheet" type="text/css" href="/static/style/form.css">
+    <title>Административная панель</title>
+</head>
+<body>
+<div class="header">
+    <h1>BBS</h1>
+    <h2>Административная панель</h2>
+</div>
+<div class="users_table">
+    <div class="table-header">
+        <button class="done" onclick="window.location.href = '/logout'">Выход</button>
+        <h3>Пользователи</h3>
+        <button class="add" onclick="newUserFormOpen()">Добавить</button>
+    </div>
+    <div id="users">
+        <table class="users_table">
+            <thead>
+            <tr>
+                <th>логин</th>
+                <th>пароль</th>
+                <th>админ</th>
+            </tr>
+            </thead>
+            <tfoot>
+            <tr>
+                <td colspan="3">
+                    {{/*                    <div class="links"><a href="#">&laquo;</a> <a class="active" href="#">1</a> <a href="#">2</a> <a*/}}
+                    {{/*                                href="#">3</a> <a href="#">4</a> <a href="#">&raquo;</a></div>*/}}
+                </td>
+            </tr>
+            </tfoot>
+            <tbody>
+            {{ range .Users }}
+                <tr>
+                    <td>{{ .Login }}</td>
+                    <td>{{ .Password }}</td>
+                    {{ if .Admin }}
+                        <td><img src="/static/imgs/true.png" alt="админ"></td>
+                    {{ else }}
+                        <td><img src="/static/imgs/false.png" alt="пользователь"></td>
+                    {{ end }}
+                </tr>
+            {{ end }}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="reports_table">
+    <div class="table-header">
+        <h3>Отчеты</h3>
+    </div>
+    <div id="reports">
+        <table class="users_table">
+            <thead>
+            <tr>
+                <th>дата</th>
+                <th>заказ</th>
+                <th>работник</th>
+            </tr>
+            </thead>
+            <tfoot>
+            <tr>
+                <td colspan="3">
+                    {{/*                        <div class="links"><a href="#">&laquo;</a> <a class="active" href="#">1</a> <a href="#">2</a> <a href="#">3</a> <a href="#">4</a> <a href="#">&raquo;</a></div>*/}}
+                </td>
+            </tr>
+            </tfoot>
+            <tbody>
+            {{ range .Reports }}
+                <tr>
+                    <td>{{ .Date }}</td>
+                    <td>{{ .OrderNumber }}</td>
+                    <td>{{ .User }}</td>
+                </tr>
+            {{ end }}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="add-new-user" id="new-user">
+    <div class="form">
+        <fieldset>
+            <legend>Добавить нового пользователя:</legend>
+            <form action="/admin/new_user" method="post">
+                <label>Логин<input type="text" placeholder="логин" name="login" required/></label>
+                    <label>Пароль<input type="text" placeholder="пароль" name="password" required/></label>
+                <label><input type="checkbox" name="admin" value="admin">является админом</label>
+                <input type="button" onclick="newUserFormClose()" value="Отмена">
+                <input type="submit" onclick="newUserFormClose()" value="Добавить">
+            </form>
+        </fieldset>
+    </div>
+</div>
+<script src="/static/scripts/admin.js"></script>
+</body>
+</html>

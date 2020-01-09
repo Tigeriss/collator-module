@@ -1,0 +1,34 @@
+body {
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+#login-page {
+    background: #3c57ff; /* fallback for old browsers */
+    background: -webkit-linear-gradient(right, #3c57ff, #6C8CD5);
+    background: -moz-linear-gradient(right, #3c57ff, #6C8CD5);
+    background: -o-linear-gradient(right, #3c57ff, #6C8CD5);
+    background: linear-gradient(to left, #3c57ff, #6C8CD5);
+}
+
+.header, .add, .done {
+    background: #4671D5;
+    background: -moz-linear-gradient(top, #4671D5 0%, #3570ad 66%, #6C8CD5 100%);
+    background: -webkit-linear-gradient(top, #4671D5 0%, #3570ad 66%, #6C8CD5 100%);
+    background: linear-gradient(to bottom, #4671D5 0%, #3570ad 66%, #6C8CD5 100%);
+}
+
+.add, .done {
+    font-size: larger;
+    color: #FFFFFF;
+    padding: 2px 8px;
+    border-radius: 5px;
+    border: 2px solid #1240AB;
+}
+.add {
+
+    margin-bottom: 20px;
+}
+.done {
+    margin: 5px;
+}

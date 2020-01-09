@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="/static/style/main.css">
+    <link rel="stylesheet" type="text/css" href="/static/style/form.css">
+    <title>Логин</title>
+</head>
+<body id="login-page">
+<div class="login-page">
+    <div class="form">
+        <fieldset id="outerLegend">
+            <legend>Вход в приложение:</legend>
+        <form class="login-form" action="/login/enter" method="post">
+            <label>Логин<input type="text" placeholder="пользователь" name="login" required/></label>
+                <label>Пароль<input type="password" placeholder="пароль" name="password" required/></label>
+                    <label><input type="submit" value="Войти"></label>
+        </form>
+        </fieldset>
+    </div>
+</div>
+</body>
+</html>

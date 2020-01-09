@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="/static/style/table.css">
+    <link rel="stylesheet" type="text/css" href="/static/style/main.css">
+    <link rel="stylesheet" type="text/css" href="/static/style/form.css">
+    <title>Сканирование</title>
+</head>
+<body>
+<div class="header">
+    <h1>BBS</h1>
+    <h2>Сканирование</h2>
+</div>
+<div class="table-header container">
+    <button class="done" onclick="window.location.href = '/logout'">Выход</button>
+    <button id="new_scan" class="done" onclick="startScanFormOpen()">Начать новое сканирование</button>
+    <h3 id="order">Заказ: укажите заказ чтобы начать работу.</h3>
+    <h3 id="date"></h3>
+    <h3 id="user">{{ . }}</h3>
+</div>
+<div id="report">
+<table class="users_table" id="scan_table">
+    <thead id="scan_table_head">
+    </thead>
+    <tfoot>
+    <tr>
+        <td id="scan_table_footer" colspan="1">
+            <button class="done" onclick="finishScan()">Завершить</button>
+        </td>
+    </tr>
+    </tfoot>
+    <tbody id="scan_table_body">
+    </tbody>
+</table>
+</div>
+<div class="start-scan-form" id="new-scan">
+    <div class="form">
+        <fieldset>
+        <legend>Начать сканирование по заказу:</legend>
+
+            <label>Номер заказа<input type="text" placeholder="номер заказа" name="order_number" id="order_number" required/></label>
+            <label>Слоев<input type="text" placeholder="количество слоев" name="layers" id="layers" required/></label>
+        <button class="done" onclick="startScan()">Начать сканирование</button>
+            <button class="done" onclick="startScanFormClose()">Отмена</button>
+        </fieldset>
+    </div>
+</div>
+
+<script src="/static/scripts/scan.js"></script>
+</body>
+</html>
