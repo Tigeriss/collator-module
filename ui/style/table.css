@@ -53,6 +53,10 @@ table.users_table tfoot a{
     background: #4671D5;
 }
 
+td > * {
+    vertical-align: baseline;
+}
+
 .header, table.users_table tfoot a {
     color: #FFFFFF;
     padding: 2px 8px;

@@ -10,6 +10,10 @@ let hasNoError = true; // if there is a fault number in this row - set to true
 document.addEventListener("DOMContentLoaded", startScanFormClose);
 document.addEventListener('keydown', addNumber);
 
+window.onbeforeunload = function(){
+    return "Все данные сканирования будут потеряны!";
+}
+
 function addNumber(event) {
     if (isStarted) {
         if (event.key !== 'Enter') {
@@ -17,7 +21,6 @@ function addNumber(event) {
         } else {
             if (currentColumn < layers) {
                 let id = (currentRow - 1).toString().concat("_", currentColumn.toString());
-                console.log(id);
                 document.getElementById(id).innerText = barcode;
                 if (currentColumn !== 0 && firstBarcode !== barcode) {
                     hasNoError = false;
@@ -25,7 +28,6 @@ function addNumber(event) {
                 } else if (currentColumn === 0) {
                     firstBarcode = barcode;
                 }
-                console.log(barcode);
                 barcode = "";
                 if (currentColumn === (layers - 1)) {
                     setStatus();
@@ -70,16 +72,8 @@ function finishScan() {
     if (currentRow !== 0) {
         document.getElementById("scan_table").deleteRow(currentRow);
     }
-    orderNumber = "";
-    layers = 0;
-    hasNoError = true;
     createReport();
-    let allRows = document.getElementById("scan_table").querySelectorAll("tr");
-    for (let i = 0; i < allRows.length - 1; i++) {
-        document.getElementById("scan_table").deleteRow(0);
-    }
-    currentRow = 0;
-    document.getElementById("new_scan").disabled = false;
+
 }
 
 function setTable() {
@@ -153,21 +147,52 @@ function setStatus() {
     document.getElementById((currentRow - 1).toString().concat("_status")).innerHTML = statusHTML;
 }
 
+function clearScanTable() {
+    orderNumber = "";
+    layers = 0;
+    hasNoError = true;
+    let allRows = document.getElementById("scan_table").querySelectorAll("tr");
+    for (let i = 0; i < allRows.length - 1; i++) {
+        document.getElementById("scan_table").deleteRow(0);
+    }
+    currentRow = 0;
+    document.getElementById("new_scan").disabled = false;
+}
+
 function createReport() {
-    let table = document.getElementById('report').innerHTML;
-    let style = "<style>";
-    style = style.concat("table{width: 100%; font: 16px Comic Sans MS; }",
-        "table, th, td {border: solid 1px #DDD; border-collapse: collapse;",
-        "padding: 2px 3px;text-align: center;}</style>",);
-
-    let winObj = window.open('', '', 'height=600,width=800');
-    winObj.document.write('<html lang="ru"><head><title>Отчет</title>');
-    winObj.document.write(style);
-    winObj.document.write('</head>');
-    winObj.document.write('<body>');
-    winObj.document.write(table);
-    winObj.document.write('</body></html>');
-
-    winObj.document.close();
-    winObj.print();
+    let allRows = [];
+    let scanTable = document.getElementById('scan_table');
+    for(let i = 0; i < scanTable.tBodies[0].children.length; i++){
+        let tr = scanTable.tBodies[0].children[i];
+        let row = []
+        for(let n = 0; n < tr.cells.length; n++){
+            let tmp;
+            if(n < tr.cells.length - 1){
+                tmp = tr.cells[n].innerText;
+            }else {
+                tmp = tr.cells[n].getElementsByTagName('img')[0].getAttribute('alt');
+            }
+            row.push(tmp);
+        }
+        console.log(row);
+        allRows.push(row);
+    }
+    let report = {
+        'user': document.getElementById('user').innerText,
+        'date': currentDate(),
+        'order_number': orderNumber,
+        'scans_amount': layers,
+        'scan_rows': allRows,
+    }
+    let xmlHttpRequest = new XMLHttpRequest();
+    let url = "/scan/send_report";
+    xmlHttpRequest.open("POST", url, true);
+    xmlHttpRequest.setRequestHeader("Content-Type", "application/json");
+    xmlHttpRequest.onreadystatechange = function () {
+        if(xmlHttpRequest.readyState === 4 && xmlHttpRequest.status === 200){
+            clearScanTable();
+        }
+    }
+    let data = JSON.stringify(report);
+    xmlHttpRequest.send(data);
 }

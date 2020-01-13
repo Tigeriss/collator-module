@@ -13,11 +13,7 @@ func authorizeUser(login, pass string) (string, string, error) {
 	defer closeAllDB()
 
 	// authorization and authentication logic
-	user := User{
-		Login:    "",
-		Password: "",
-		Admin:    false,
-	}
+	user := User{}
 	err := pudge.Get("./db/users", login, &user)
 	if err != nil {
 		return "", "", err

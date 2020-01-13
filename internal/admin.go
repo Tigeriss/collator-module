@@ -1,9 +1,8 @@
 package internal
 
 import (
-	"log"
-
 	"github.com/recoilme/pudge"
+	"log"
 )
 
 type AdminData struct {
@@ -18,12 +17,6 @@ func getUsers() ([]User, error) {
 		return nil, err
 	}
 
-	// num, err := pudge.Count("./db/users")
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	log.Printf("total: %d\n", len(keys))
 	users := make([]User, 0, len(keys))
 	for _, key := range keys {
 		var u User
@@ -90,9 +83,12 @@ func AddUser(login, pass string, adm bool) (AdminData, error) {
 	return FormData()
 }
 
-// func DeleteUser(login string)AdminData {
-//	defer pudge.CloseAll()
-//	err := pudge.Delete("./db/users", login)
-//	check(err)
-//	return FormData()
-// }
+func DeleteUser(login string) error {
+	log.Println("going to delete " + login)
+	defer pudge.CloseAll()
+	err := pudge.Delete("./db/users", login)
+	if err != nil {
+		return err
+	}
+	return nil
+}

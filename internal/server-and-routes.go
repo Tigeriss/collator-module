@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"encoding/json"
+	"github.com/recoilme/pudge"
 	"html/template"
 	"log"
 	"net/http"
@@ -17,11 +19,16 @@ type UserSession struct {
 	CurrentUser string `json:"currentUser"`
 }
 
+// root will always redirect to login page. is it right or ?
 func handlerRoot(writer http.ResponseWriter, request *http.Request) {
 	http.Redirect(writer, request, "/login", http.StatusFound)
 }
 
+
 func handlerLogin(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != "GET" {
+		return
+	}
 	err := tmpl.ExecuteTemplate(writer, "login.html", nil)
 	if err != nil {
 		responseInternalError(writer, err)
@@ -123,6 +130,41 @@ func handlerLogout(writer http.ResponseWriter, request *http.Request) {
 	http.Redirect(writer, request, "login", http.StatusFound)
 }
 
+func handlerReceiveReport(writer http.ResponseWriter, request *http.Request){
+	if request.Method == "POST" {
+		err := jsonToReportObject(request)
+		if err != nil {
+			responseInternalError(writer, err)
+		}
+	}
+}
+
+func handlerAdminDeleteUser(writer http.ResponseWriter, request *http.Request){
+	if request.Method == "POST" {
+		decoder := json.NewDecoder(request.Body)
+		login := ""
+		decoder.Decode(&login)
+		err := DeleteUser(login)
+		if err != nil {
+			responseInternalError(writer, err)
+		}
+		http.Redirect(writer, request, "/admin", http.StatusFound)
+	}
+}
+
+func handlerAdminDeleteReport(writer http.ResponseWriter, request *http.Request){
+	if request.Method == "POST" {
+		decoder := json.NewDecoder(request.Body)
+		orderNumber := ""
+		decoder.Decode(&orderNumber)
+		 err := DeleteReport(orderNumber)
+		 if err != nil {
+		 	responseInternalError(writer, err)
+		 }
+		http.Redirect(writer, request, "/admin", http.StatusFound)
+	}
+}
+
 func handlerAdminNewUser(writer http.ResponseWriter, request *http.Request) {
 	// trying to load a session from user's request
 	var userSession UserSession
@@ -151,14 +193,31 @@ func handlerAdminNewUser(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
+func createFirstAdmin() {
+	defer closeAllDB()
+	u := User{
+		Login:    "admin",
+		Password: "admin",
+		Admin:    true,
+	}
+	err := pudge.Set("./db/users", u.Login, u)
+	if err != nil {
+		// do something
+	}
+}
+
 func ApplicationStart() {
+	createFirstAdmin()
 	http.HandleFunc("/", handlerRoot)
 	http.HandleFunc("/scan", handlerScan)
+	http.HandleFunc("/scan/send_report", handlerReceiveReport)
 	http.HandleFunc("/login", handlerLogin)
 	http.HandleFunc("/login/enter", handlerLoginCheck)
+	http.HandleFunc("/logout", handlerLogout)
 	http.HandleFunc("/admin", handlerAdmin)
 	http.HandleFunc("/admin/new_user", handlerAdminNewUser)
-	http.HandleFunc("/logout", handlerLogout)
+	http.HandleFunc("/admin/delete_user", handlerAdminDeleteUser)
+	http.HandleFunc("/admin/delete_report", handlerAdminDeleteReport)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("ui/"))))
 	log.Fatal(http.ListenAndServe(":9090", nil))
 }

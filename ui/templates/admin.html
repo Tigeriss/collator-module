@@ -25,13 +25,12 @@
                 <th>логин</th>
                 <th>пароль</th>
                 <th>админ</th>
+                <th>удалить</th>
             </tr>
             </thead>
             <tfoot>
             <tr>
-                <td colspan="3">
-                    {{/*                    <div class="links"><a href="#">&laquo;</a> <a class="active" href="#">1</a> <a href="#">2</a> <a*/}}
-                    {{/*                                href="#">3</a> <a href="#">4</a> <a href="#">&raquo;</a></div>*/}}
+                <td colspan="4">
                 </td>
             </tr>
             </tfoot>
@@ -41,10 +40,11 @@
                     <td>{{ .Login }}</td>
                     <td>{{ .Password }}</td>
                     {{ if .Admin }}
-                        <td><img src="/static/imgs/true.png" alt="админ"></td>
+                        <td width="10%" align="center"><img src="/static/imgs/true.png" alt="админ"></td>
                     {{ else }}
-                        <td><img src="/static/imgs/false.png" alt="пользователь"></td>
+                        <td width="10%" align="center"><img src="/static/imgs/false.png" alt="пользователь"></td>
                     {{ end }}
+                    <td width="10%" align="center"><button class="done" onclick="deleteUser({{ .Login }})">X</button> </td>
                 </tr>
             {{ end }}
             </tbody>
@@ -62,12 +62,13 @@
                 <th>дата</th>
                 <th>заказ</th>
                 <th>работник</th>
+                <th>открыть</th>
+                <th></th>
             </tr>
             </thead>
             <tfoot>
             <tr>
-                <td colspan="3">
-                    {{/*                        <div class="links"><a href="#">&laquo;</a> <a class="active" href="#">1</a> <a href="#">2</a> <a href="#">3</a> <a href="#">4</a> <a href="#">&raquo;</a></div>*/}}
+                <td colspan="4">
                 </td>
             </tr>
             </tfoot>
@@ -77,6 +78,8 @@
                     <td>{{ .Date }}</td>
                     <td>{{ .OrderNumber }}</td>
                     <td>{{ .User }}</td>
+                    <td width="10%" align="center"><button class="done" onclick="openReport({{ .OrderNumber }})">V</button> </td>
+                    <td width="10%" align="center"><button class="done" onclick="deleteReport({{ .OrderNumber }})">X</button> </td>
                 </tr>
             {{ end }}
             </tbody>
