@@ -18,8 +18,8 @@ const (
 
 var (
 	key         = []byte("f9abac83a0db40d2238d09fc22d0fce4")
-	sessionPath = path.Join(os.TempDir(), "collator-sessions")
-	store       = sessions.NewFilesystemStore(sessionPath, key)
+	sessionPath = path.Join(".", "collator-sessions")
+	store = sessions.NewCookieStore(key)
 )
 
 func init() {

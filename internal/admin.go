@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/recoilme/pudge"
+	"path"
 )
 
 type AdminData struct {
@@ -11,7 +12,7 @@ type AdminData struct {
 
 func getUsers() ([]User, error) {
 	defer closeAllDB()
-	keys, err := pudge.Keys("./db/users", 0, 0, 0, true)
+	keys, err := pudge.Keys(path.Join(".", "db", "users"), 0, 0, 0, true)
 	if err != nil {
 		return nil, err
 	}
@@ -19,7 +20,7 @@ func getUsers() ([]User, error) {
 	users := make([]User, 0, len(keys))
 	for _, key := range keys {
 		var u User
-		err := pudge.Get("./db/users", key, &u)
+		err := pudge.Get(path.Join(".", "db", "users"), key, &u)
 		if err != nil {
 			return nil, err
 		}
@@ -32,14 +33,14 @@ func getUsers() ([]User, error) {
 
 func getReports() ([]Report, error) {
 	defer closeAllDB()
-	keys, err := pudge.Keys("./db/reports", 0, 0, 0, true)
+	keys, err := pudge.Keys(path.Join(".", "db", "reports"), 0, 0, 0, true)
 	if err != nil {
 		return nil, err
 	}
 	reports := make([]Report, 0, len(keys))
 	for _, key := range keys {
 		var r Report
-		err := pudge.Get("./db/reports", key, &r)
+		err := pudge.Get(path.Join(".", "db", "reports"), key, &r)
 		if err != nil {
 			return nil, err
 		}
@@ -70,7 +71,7 @@ func AddUser(login, pass string, adm bool) (AdminData, error) {
 		Password: pass,
 		Admin:    adm,
 	}
-	err := pudge.Set("./db/users", u.Login, u)
+	err := pudge.Set(path.Join(".", "db", "users"), u.Login, u)
 	if err != nil {
 		return AdminData{}, err
 	}
@@ -80,7 +81,7 @@ func AddUser(login, pass string, adm bool) (AdminData, error) {
 
 func DeleteUser(login string) error {
 	defer pudge.CloseAll()
-	err := pudge.Delete("./db/users", login)
+	err := pudge.Delete(path.Join(".", "db", "users"), login)
 	if err != nil {
 		return err
 	}

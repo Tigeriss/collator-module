@@ -182,10 +182,8 @@ function createReport() {
 
             row.push({value: tmp, valid: ok});
         }
-        console.log(row);
         allRows.push(row);
     }
-    console.log(layers);
     let report = {
         'user': document.getElementById('user').innerText,
         'date': currentDate(),

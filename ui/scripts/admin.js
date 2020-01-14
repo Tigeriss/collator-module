@@ -38,16 +38,3 @@ function deleteReport(orderNumber) {
         let data = JSON.stringify(orderNumber);
         xmlHttpRequest.send(data);
 }
-
-function openReport(orderNumber) {
-    let url = "/admin/open_report/?order_number=" + orderNumber;
-    fetch(url).then((response) => {
-        return response.json();
-    }).then((dataJson) => {
-        fillReportTable(dataJson);
-    });
-}
-
-function fillReportTable(dataJson){
-    console.log(dataJson);
-}

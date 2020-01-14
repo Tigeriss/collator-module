@@ -1,6 +1,9 @@
 package internal
 
-import "github.com/recoilme/pudge"
+import (
+	"github.com/recoilme/pudge"
+	"path"
+)
 
 type User struct {
 	Login    string `json:"login"`
@@ -14,7 +17,7 @@ func authorizeUser(login, pass string) (string, string, error) {
 
 	// authorization and authentication logic
 	user := User{}
-	err := pudge.Get("./db/users", login, &user)
+	err := pudge.Get(path.Join(".", "db", "users"), login, &user)
 	if err != nil {
 		return "", "", err
 	}

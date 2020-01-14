@@ -3,7 +3,9 @@ package internal
 import (
 	"encoding/json"
 	"github.com/recoilme/pudge"
+	"log"
 	"net/http"
+	"path"
 )
 
 type Field struct {
@@ -33,7 +35,8 @@ func jsonToReportObject(request *http.Request) error {
 func getReportFromDB(orderNumber string) (Report, error) {
 	report := Report{}
 	defer closeAllDB()
-	err := pudge.Get("./db/reports", orderNumber, &report)
+	err := pudge.Get(path.Join(".", "db", "reports"), orderNumber, &report)
+	log.Println(report.ScanRows[0][0].Value)
 	if err != nil {
 		return report, err
 	}
@@ -42,7 +45,8 @@ func getReportFromDB(orderNumber string) (Report, error) {
 
 func addReportRecord(report Report) error {
 	defer closeAllDB()
-	err := pudge.Set("./db/reports", report.OrderNumber, report)
+	log.Println(report.ScanRows[0][0].Value)
+	err := pudge.Set(path.Join(".", "db", "reports"), report.OrderNumber, report)
 	if err != nil {
 		return  err
 	}
@@ -51,7 +55,7 @@ func addReportRecord(report Report) error {
 
 func DeleteReport(orderNumber string)  error {
 	defer pudge.CloseAll()
-	err := pudge.Delete("./db/reports", orderNumber)
+	err := pudge.Delete(path.Join(".", "db", "reports"), orderNumber)
 	if err != nil {
 		return err
 	}
