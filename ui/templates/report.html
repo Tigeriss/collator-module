@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="/static/style/table.css">
+    <link rel="stylesheet" type="text/css" href="/static/style/main.css">
+    <link rel="stylesheet" type="text/css" href="/static/style/form.css">
+    <title>Отчет № {{ .Data.OrderNumber }}</title>
+</head>
+<body>
+<div class="table-header container">
+    <h3 id="order">Заказ: {{ .Data.OrderNumber }}</h3>
+    <h3 id="date">Дата: {{ .Data.Date }}</h3>
+    <h3 id="user">Работник: {{ .Data.User }}</h3>
+</div>
+<div id="report">
+    <table class="users_table" id="scan_table">
+        <thead id="scan_table_head">
+        {{ range .Headers }}
+            <th> {{ . }} </th>
+        {{ end }}
+        </thead>
+        <tbody id="scan_table_body">
+        {{ range .Data.ScanRows }}
+            <tr>
+                {{ range . }}
+                    {{ if .Valid}}
+                    <td> {{ .Value }} </td>
+                        {{ else }}
+                        <td style="color: red"> {{ .Value }} </td>
+                        {{ end }}
+                {{ end }}
+            </tr>
+        {{ end }}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

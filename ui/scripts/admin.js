@@ -40,14 +40,14 @@ function deleteReport(orderNumber) {
 }
 
 function openReport(orderNumber) {
-    let xmlHttpRequest = new XMLHttpRequest();
-    let url = "/admin/open_report";
-    xmlHttpRequest.open("GET", url, true);
-    xmlHttpRequest.setRequestHeader("Content-Type", "application/json");
-    xmlHttpRequest.onreadystatechange = function () {
-        if(xmlHttpRequest.readyState === 4 && xmlHttpRequest.status === 200){
-        }
-    }
-    let data = JSON.stringify(orderNumber);
-    xmlHttpRequest.send(data);
+    let url = "/admin/open_report/?order_number=" + orderNumber;
+    fetch(url).then((response) => {
+        return response.json();
+    }).then((dataJson) => {
+        fillReportTable(dataJson);
+    });
+}
+
+function fillReportTable(dataJson){
+    console.log(dataJson);
 }

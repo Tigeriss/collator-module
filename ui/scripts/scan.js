@@ -167,16 +167,25 @@ function createReport() {
         let row = []
         for(let n = 0; n < tr.cells.length; n++){
             let tmp;
+            let ok = true;
             if(n < tr.cells.length - 1){
                 tmp = tr.cells[n].innerText;
+                if(tr.cells[n].style.color === "red"){
+                    ok = false;
+                }
             }else {
                 tmp = tr.cells[n].getElementsByTagName('img')[0].getAttribute('alt');
+                if(tmp === "Ошибка"){
+                    ok = false;
+                }
             }
-            row.push(tmp);
+
+            row.push({value: tmp, valid: ok});
         }
         console.log(row);
         allRows.push(row);
     }
+    console.log(layers);
     let report = {
         'user': document.getElementById('user').innerText,
         'date': currentDate(),
@@ -184,6 +193,7 @@ function createReport() {
         'scans_amount': layers,
         'scan_rows': allRows,
     }
+    console.log(report);
     let xmlHttpRequest = new XMLHttpRequest();
     let url = "/scan/send_report";
     xmlHttpRequest.open("POST", url, true);

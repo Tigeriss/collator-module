@@ -2,7 +2,6 @@ package internal
 
 import (
 	"github.com/recoilme/pudge"
-	"log"
 )
 
 type AdminData struct {
@@ -37,18 +36,15 @@ func getReports() ([]Report, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	reports := make([]Report, len(keys))
+	reports := make([]Report, 0, len(keys))
 	for _, key := range keys {
 		var r Report
 		err := pudge.Get("./db/reports", key, &r)
 		if err != nil {
 			return nil, err
 		}
-
 		reports = append(reports, r)
 	}
-
 	return reports, nil
 }
 
@@ -61,7 +57,6 @@ func FormData() (AdminData, error) {
 	if err != nil {
 		return AdminData{}, err
 	}
-
 	return AdminData{
 		Users:   users,
 		Reports: reports,
@@ -84,7 +79,6 @@ func AddUser(login, pass string, adm bool) (AdminData, error) {
 }
 
 func DeleteUser(login string) error {
-	log.Println("going to delete " + login)
 	defer pudge.CloseAll()
 	err := pudge.Delete("./db/users", login)
 	if err != nil {

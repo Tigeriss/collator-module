@@ -3,26 +3,25 @@ package internal
 import (
 	"encoding/json"
 	"github.com/recoilme/pudge"
-	"log"
 	"net/http"
 )
 
-type ScanRow struct {
-	SerialNumber string `json:"serial_number"`
-	ScannedNumbers []string `json:"scanned_numbers"`
-	Status         bool     `json:"status"`
+type Field struct {
+	Value string `json:"value"`
+	Valid bool `json:"valid"`
 }
+
 type Report struct {
 	User        string    `json:"user"`
 	Date        string    `json:"date"`
 	OrderNumber string    `json:"order_number"`
-	ScansAmount int       `json:"scans_amount"`
-	ScanRows    []ScanRow `json:"scan_rows"`
+	ScansAmount string       `json:"scans_amount"`
+	ScanRows    [][]Field `json:"scan_rows"`
 }
 
 func jsonToReportObject(request *http.Request) error {
-	decoder := json.NewDecoder(request.Body)
 	report := Report{}
+	decoder := json.NewDecoder(request.Body)
 	decoder.Decode(&report)
 	err := addReportRecord(report)
 	if err != nil {
@@ -51,7 +50,6 @@ func addReportRecord(report Report) error {
 }
 
 func DeleteReport(orderNumber string)  error {
-	log.Println("going to delete " + orderNumber)
 	defer pudge.CloseAll()
 	err := pudge.Delete("./db/reports", orderNumber)
 	if err != nil {

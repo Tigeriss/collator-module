@@ -6,12 +6,13 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 
 	"collator-module/internal/session"
 )
 
 var (
-	tmpl = template.Must(template.ParseFiles("./ui/templates/login.html", "./ui/templates/admin.html", "./ui/templates/scan.html"))
+	tmpl = template.Must(template.ParseFiles("./ui/templates/login.html", "./ui/templates/admin.html", "./ui/templates/scan.html", "./ui/templates/report.html"))
 )
 
 type UserSession struct {
@@ -23,7 +24,6 @@ type UserSession struct {
 func handlerRoot(writer http.ResponseWriter, request *http.Request) {
 	http.Redirect(writer, request, "/login", http.StatusFound)
 }
-
 
 func handlerLogin(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != "GET" {
@@ -117,51 +117,110 @@ func handlerLogout(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		responseInternalError(writer, err)
 	}
-
 	userSession.ApiKey = ""
 	userSession.CurrentUser = ""
 	//  don't forget to save it!
+
 	err = session.Save(userSession, writer, request)
 	if err != nil {
 		responseInternalError(writer, err)
 		return
 	}
-
 	http.Redirect(writer, request, "login", http.StatusFound)
 }
 
-func handlerReceiveReport(writer http.ResponseWriter, request *http.Request){
+func handlerReceiveReport(writer http.ResponseWriter, request *http.Request) {
+	var userSession UserSession
+	err := session.Load(&userSession, writer, request)
+	if err != nil {
+		responseInternalError(writer, err)
+	}
 	if request.Method == "POST" {
-		err := jsonToReportObject(request)
-		if err != nil {
-			responseInternalError(writer, err)
+		if userSession.ApiKey == "admin" {
+			err := jsonToReportObject(request)
+			if err != nil {
+				responseInternalError(writer, err)
+			}
 		}
 	}
 }
 
-func handlerAdminDeleteUser(writer http.ResponseWriter, request *http.Request){
+func handlerAdminDeleteUser(writer http.ResponseWriter, request *http.Request) {
+	var userSession UserSession
+	err := session.Load(&userSession, writer, request)
+	if err != nil {
+		responseInternalError(writer, err)
+	}
 	if request.Method == "POST" {
-		decoder := json.NewDecoder(request.Body)
-		login := ""
-		decoder.Decode(&login)
-		err := DeleteUser(login)
-		if err != nil {
-			responseInternalError(writer, err)
+		if userSession.ApiKey == "admin" {
+			decoder := json.NewDecoder(request.Body)
+			login := ""
+			decoder.Decode(&login)
+			err := DeleteUser(login)
+			if err != nil {
+				responseInternalError(writer, err)
+			}
+			http.Redirect(writer, request, "/admin", http.StatusFound)
 		}
-		http.Redirect(writer, request, "/admin", http.StatusFound)
 	}
 }
 
-func handlerAdminDeleteReport(writer http.ResponseWriter, request *http.Request){
+func handlerAdminGetReport(writer http.ResponseWriter, request *http.Request) {
+	var userSession UserSession
+	err := session.Load(&userSession, writer, request)
+	if err != nil {
+		responseInternalError(writer, err)
+	}
+	if request.Method == "GET" {
+		if userSession.ApiKey == "admin" {
+			orderNumber := request.URL.Query().Get("order_number")
+			report, err := getReportFromDB(orderNumber)
+			if err != nil {
+				responseInternalError(writer, err)
+			}
+			type Data struct {
+				Data    Report   `json:"data"`
+				Headers []string `json:"headers"`
+			}
+			layers, err := strconv.Atoi(report.ScansAmount)
+			if err != nil {
+				responseInternalError(writer, err)
+			}
+			tmp := make([]string, 0, layers+2)
+			tmp = append(tmp, "№ п./п.")
+			for i := 1; i < layers+1; i++ {
+				tmp = append(tmp, strconv.Itoa(i))
+			}
+			tmp = append(tmp, "Статус")
+			data := Data{
+				Data:    report,
+				Headers: tmp,
+			}
+			err = tmpl.ExecuteTemplate(writer, "report.html", data)
+			if err != nil {
+				responseInternalError(writer, err)
+			}
+		}
+	}
+}
+
+func handlerAdminDeleteReport(writer http.ResponseWriter, request *http.Request) {
+	var userSession UserSession
+	err := session.Load(&userSession, writer, request)
+	if err != nil {
+		responseInternalError(writer, err)
+	}
 	if request.Method == "POST" {
-		decoder := json.NewDecoder(request.Body)
-		orderNumber := ""
-		decoder.Decode(&orderNumber)
-		 err := DeleteReport(orderNumber)
-		 if err != nil {
-		 	responseInternalError(writer, err)
-		 }
-		http.Redirect(writer, request, "/admin", http.StatusFound)
+		if userSession.ApiKey == "admin" {
+			decoder := json.NewDecoder(request.Body)
+			orderNumber := ""
+			decoder.Decode(&orderNumber)
+			err := DeleteReport(orderNumber)
+			if err != nil {
+				responseInternalError(writer, err)
+			}
+			http.Redirect(writer, request, "/admin", http.StatusFound)
+		}
 	}
 }
 
@@ -193,7 +252,7 @@ func handlerAdminNewUser(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func createFirstAdmin() {
+func createFirstAdmin() error {
 	defer closeAllDB()
 	u := User{
 		Login:    "admin",
@@ -202,8 +261,9 @@ func createFirstAdmin() {
 	}
 	err := pudge.Set("./db/users", u.Login, u)
 	if err != nil {
-		// do something
+		return err
 	}
+	return nil
 }
 
 func ApplicationStart() {
@@ -217,6 +277,7 @@ func ApplicationStart() {
 	http.HandleFunc("/admin", handlerAdmin)
 	http.HandleFunc("/admin/new_user", handlerAdminNewUser)
 	http.HandleFunc("/admin/delete_user", handlerAdminDeleteUser)
+	http.HandleFunc("/admin/open_report/", handlerAdminGetReport)
 	http.HandleFunc("/admin/delete_report", handlerAdminDeleteReport)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("ui/"))))
 	log.Fatal(http.ListenAndServe(":9090", nil))

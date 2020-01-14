@@ -63,12 +63,12 @@
                 <th>заказ</th>
                 <th>работник</th>
                 <th>открыть</th>
-                <th></th>
+                <th>удалить</th>
             </tr>
             </thead>
             <tfoot>
             <tr>
-                <td colspan="4">
+                <td colspan="5">
                 </td>
             </tr>
             </tfoot>
@@ -78,7 +78,7 @@
                     <td>{{ .Date }}</td>
                     <td>{{ .OrderNumber }}</td>
                     <td>{{ .User }}</td>
-                    <td width="10%" align="center"><button class="done" onclick="openReport({{ .OrderNumber }})">V</button> </td>
+                    <td width="10%" align="center"><a href="/admin/open_report/?order_number={{ .OrderNumber }}" target="_blank">Открыть</a></td>
                     <td width="10%" align="center"><button class="done" onclick="deleteReport({{ .OrderNumber }})">X</button> </td>
                 </tr>
             {{ end }}
