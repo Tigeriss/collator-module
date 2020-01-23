@@ -126,6 +126,7 @@ function createRow() {
         cell.setAttribute("id", (currentRow.toString().concat("_", i.toString())));
         cell.style.fontSize = "75%";
         currRow.appendChild(cell);
+        window.scrollTo(0,document.body.scrollHeight);
     }
 
     // status cell
