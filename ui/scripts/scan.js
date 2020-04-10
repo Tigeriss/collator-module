@@ -21,6 +21,17 @@ function addNumber(event) {
         if (event.key !== 'Enter') {
             barcode = barcode.concat(event.key);
         } else {
+            if (currentColumn === 0) {
+                if (isDouble(barcode)) {
+                    errSound.play();
+                    barcode = "";
+                    return;
+                } else {
+                    console.log("current row: " + currentRow + ", current barcode: " + barcode + ", all numbers stored: " + allNumbers);
+                    allNumbers[currentRow - 1] = barcode;
+                    firstBarcode = barcode;
+                }
+            }
             if (currentColumn < layers) {
                 let id = (currentRow - 1).toString().concat("_", currentColumn.toString());
                 document.getElementById(id).innerText = barcode;
@@ -29,17 +40,6 @@ function addNumber(event) {
                     errSound.play();
                     hasNoError = false;
                     document.getElementById(id).style.color = "red";
-                } else if (currentColumn === 0) {
-                    if(isDouble(barcode)){
-                        errSound.play();
-                        barcode = "";
-                    }else {
-                        firstBarcode = barcode;
-                    }
-                }
-                if(currentColumn === (layers - 1)) {
-                    console.log("current row: " + currentRow + ", current barcode: " + barcode + ", all numbers stored: " + allNumbers);
-                    allNumbers[currentRow - 1] = barcode;
                 }
                 barcode = "";
                 if (currentColumn === (layers - 1)) {
@@ -56,6 +56,9 @@ function addNumber(event) {
 }
 
 function isDouble(code) {
+    if (allNumbers.length === 0) {
+        return false;
+    }
     for (let i = 0; i < allNumbers.length; i++) {
         if (code === allNumbers[i]) {
             return true;
