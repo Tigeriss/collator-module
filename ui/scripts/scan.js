@@ -1,16 +1,18 @@
 let barcode = "";
 let firstBarcode = "";
 let orderNumber = "";
-let layers = 0;
 let isStarted = false;
+let layers = 0;
 let currentRow = 0;
 let currentColumn = 0;
+let allNumbers = [];
 let hasNoError = true; // if there is a fault number in this row - set to true
+let errSound = new Audio('static/sound/err.wav');
 
 document.addEventListener("DOMContentLoaded", startScanFormClose);
 document.addEventListener('keydown', addNumber);
 
-window.onbeforeunload = function(){
+window.onbeforeunload = function () {
     return "Все данные сканирования будут потеряны!";
 }
 
@@ -23,10 +25,21 @@ function addNumber(event) {
                 let id = (currentRow - 1).toString().concat("_", currentColumn.toString());
                 document.getElementById(id).innerText = barcode;
                 if (currentColumn !== 0 && firstBarcode !== barcode) {
+                    // play error sound
+                    errSound.play();
                     hasNoError = false;
                     document.getElementById(id).style.color = "red";
                 } else if (currentColumn === 0) {
-                    firstBarcode = barcode;
+                    if(isDouble(barcode)){
+                        errSound.play();
+                        barcode = "";
+                    }else {
+                        firstBarcode = barcode;
+                    }
+                }
+                if(currentColumn === (layers - 1)) {
+                    console.log("current row: " + currentRow + ", current barcode: " + barcode + ", all numbers stored: " + allNumbers);
+                    allNumbers[currentRow - 1] = barcode;
                 }
                 barcode = "";
                 if (currentColumn === (layers - 1)) {
@@ -38,12 +51,23 @@ function addNumber(event) {
                 }
             }
         }
+
     }
+}
+
+function isDouble(code) {
+    for (let i = 0; i < allNumbers.length; i++) {
+        if (code === allNumbers[i]) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function startScanFormOpen() {
     document.getElementById("new-scan").style.display = "block";
 }
+
 function startScanFormClose() {
     document.getElementById("new-scan").style.display = "none";
 }
@@ -126,7 +150,7 @@ function createRow() {
         cell.setAttribute("id", (currentRow.toString().concat("_", i.toString())));
         cell.style.fontSize = "75%";
         currRow.appendChild(cell);
-        window.scrollTo(0,document.body.scrollHeight);
+        window.scrollTo(0, document.body.scrollHeight);
     }
 
     // status cell
@@ -163,20 +187,20 @@ function clearScanTable() {
 function createReport() {
     let allRows = [];
     let scanTable = document.getElementById('scan_table');
-    for(let i = 0; i < scanTable.tBodies[0].children.length; i++){
+    for (let i = 0; i < scanTable.tBodies[0].children.length; i++) {
         let tr = scanTable.tBodies[0].children[i];
         let row = []
-        for(let n = 0; n < tr.cells.length; n++){
+        for (let n = 0; n < tr.cells.length; n++) {
             let tmp;
             let ok = true;
-            if(n < tr.cells.length - 1){
+            if (n < tr.cells.length - 1) {
                 tmp = tr.cells[n].innerText;
-                if(tr.cells[n].style.color === "red"){
+                if (tr.cells[n].style.color === "red") {
                     ok = false;
                 }
-            }else {
+            } else {
                 tmp = tr.cells[n].getElementsByTagName('img')[0].getAttribute('alt');
-                if(tmp === "Ошибка"){
+                if (tmp === "Ошибка") {
                     ok = false;
                 }
             }
@@ -198,7 +222,7 @@ function createReport() {
     xmlHttpRequest.open("POST", url, true);
     xmlHttpRequest.setRequestHeader("Content-Type", "application/json");
     xmlHttpRequest.onreadystatechange = function () {
-        if(xmlHttpRequest.readyState === 4 && xmlHttpRequest.status === 200){
+        if (xmlHttpRequest.readyState === 4 && xmlHttpRequest.status === 200) {
             clearScanTable();
         }
     }
